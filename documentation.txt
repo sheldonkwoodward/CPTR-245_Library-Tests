@@ -1,6 +1,13 @@
+By: Sheldon Woodward and Nick Perry
+Assignment: Homework 5
+Class: CPTR 245
+Date: 10/31/17
+
+
 ===================
 == Documentation ==
 ===================
+
 The first step in this TDD process was to generate user stories. For our project we decided 
 to create a database manager that can be used by librarians. The user stories are as follows:
 
@@ -456,14 +463,8 @@ version looks like this:
         }
 
 
-========================
-== 3. Edit Book Tests ==
-========================
-Our first happy path test for the editBookTest() will be created with the goal of allowing the librarian to edit books.
-
-
 ==========================
-== 4. Remove Book Tests ==
+== 3. Remove Book Tests ==
 ==========================
 
 Our first happy path test for the removeBookTest() will be created with the goal of allowing the librarian to remove a book from the Library.
@@ -532,3 +533,10 @@ void removeBook(String book_Id){
 
 As you can see, we parsed through the books in the library, and after the book was removed, we grouped all the books that had ID numbers GREATER THAN the id number of the removed book, and shifted
 down their ID numbers by one.
+
+
+===================
+== 4. Conclusion ==
+===================
+
+In conclusion, we feel that these tests adequately verify the functionality of our Library class. 
