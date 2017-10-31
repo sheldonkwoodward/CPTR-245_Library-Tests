@@ -3,11 +3,18 @@ import java.util.*;
 
 public class Library {
     private final int A_NUM = 7; // number of attributes for each books
+    private Map<String, Integer> selects;
     private Map<String, Integer> params;
     ArrayList<String[]> books; // books list
 
     Library() {
         books = new ArrayList<>();
+
+        // build selects
+        selects = new HashMap<String, Integer>();
+        selects.put("SELECT", 0);
+        selects.put("ORDER", 1);
+        selects.put("END", 2);
 
         // build parameters
         params = new HashMap<String, Integer>();
@@ -51,8 +58,33 @@ public class Library {
             String element = iter.next();
             if(element.endsWith(",")) {
                 parts.set(parts.indexOf(element), element.substring(0, element.length() - 1));
-                // iter.add(",");
+
             }
+        }
+        if(parts.get(parts.size() - 1) != "END") {
+            parts.add("END"); // add end to parts parse
+        }
+
+        // exception detection
+        boolean foundSELECT = false;
+        String lastPart = "";
+        for(String el : parts) {
+            // out of order selectors
+            if(el.equals("SELECT")) {
+                foundSELECT = true;
+            }
+            if(el.equals("ORDER") && !foundSELECT) {
+                throw new BadQueryException("ORDER before SELECT");
+            }
+            // bad selectors/parameters
+            if(!el.equals(",") && selects.get(el) == null && params.get(el) == null) {
+                throw new BadQueryException("Bad selector/parameter");
+            }
+            // missing parameters
+            if(selects.get(lastPart) != null && selects.get(el) != null) {
+                throw new BadQueryException("Missing parameter");
+            }
+            lastPart = el;
         }
 
         // output of parse
