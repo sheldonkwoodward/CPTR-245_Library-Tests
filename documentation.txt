@@ -346,10 +346,76 @@ we will make a series of exception tests to make sure the query string is proper
 ========================
 == 3. Edit Book Tests ==
 ========================
+Our first happy path test for the editBookTest() will be created with the goal of allowing the librarian to edit books.
 
 
 ==========================
 == 4. Remove Book Tests ==
 ==========================
 
+Our first happy path test for the removeBookTest() will be created with the goal of allowing the librarian to remove a book from the Library.
+So first in the test we initiated some example books so that we could remove them. Then, we hardcoded that lib.books.size() would return 1, because we only started with 2 example books.
 
+@Test public void removeBookTest() {
+        String[] bookArr0 = {"0", "In", "Moby-Dick", "Herman Melville", "Adventure", "1851", "1200"};
+        String[] bookArr1 = {"1", "In", "If You Give a Mouse a Cookie", "Laura Numeroff", "Children", "1985", "20"};
+
+        // adding books in order to test removeBook() method
+        lib.addBook(bookArr0[2], bookArr0[3], bookArr0[4], bookArr0[5], bookArr0[6]);
+        lib.addBook(bookArr1[2], bookArr1[3], bookArr1[4], bookArr1[5], bookArr1[6]);
+
+        lib.removeBook(bookArr0[0]);
+        Assert.assertArrayEquals(bookArr1, lib.books.get(0));
+        assert(lib.books.size() == 1);
+
+    }
+
+this happy path test gave us a basis to start creating our removeBook() function, and receive our first green bar for this Library method.
+
+void removeBook(String book_Id){
+        for (String[] book : books){
+            if (book_Id.equals(book[0])){
+                books.remove(book);
+                break;
+            }
+        }
+    }
+
+
+We then went on to create a new test to ensure that when a book was deleted, all the books after it had their id's shifted down by 1 (because a book's id is just an integer of which place they are in 
+sequence).
+
+@Test public void IdAssignmentAfterRemoveTest() {
+        String[] bookArr0 = {"0", "In", "Moby-Dick", "Herman Melville", "Adventure", "1851", "1200"};
+        String[] bookArr1 = {"1", "In", "If You Give a Mouse a Cookie", "Laura Numeroff", "Children", "1985", "20"};
+
+        // adding books in order to test removeBook() method
+        lib.addBook(bookArr0[2], bookArr0[3], bookArr0[4], bookArr0[5], bookArr0[6]);
+        lib.addBook(bookArr1[2], bookArr1[3], bookArr1[4], bookArr1[5], bookArr1[6]);
+
+        bookArr1[0] = "0";
+        lib.removeBook(bookArr0[0]);
+
+        assert(lib.books.get(0)[0].equals("0"));
+    }
+
+The creation of this test leads us to change the removeBook() method a bit, to include some post-removal adjustments to the IDs of the books that came after it.
+
+void removeBook(String book_Id){
+        for (String[] book : books){
+            if (book[0].equals(book_Id)){
+                books.remove(book);
+                break;
+            }
+        }
+        for (String[] book : books){
+            if (Integer.parseInt(book[0]) > Integer.parseInt(book_Id)){
+                int newID = Integer.parseInt(book[0])-1;
+                book[0] = String.valueOf(newID);
+            }
+            System.out.println(book[0]);
+        }
+    }
+
+As you can see, we parsed through the books in the library, and after the book was removed, we grouped all the books that had ID numbers GREATER THAN the id number of the removed book, and shifted
+down their ID numbers by one.
