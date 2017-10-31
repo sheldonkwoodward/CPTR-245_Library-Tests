@@ -82,6 +82,26 @@ public class TestLibrary {
         Assert.assertArrayEquals(expected.toArray(), actual.toArray());
     }
 
+    @Test (expected = BadQueryException.class)
+    public void queryOutOfOrderTest() {
+        lib.queryBook("ORDER title SELECT title, author");
+    }
+
+    @Test (expected = BadQueryException.class)
+    public void queryBadSelectorTest() {
+        lib.queryBook("SELECT title, author ORDERIFY title");
+    }
+
+    @Test (expected = BadQueryException.class)
+    public void queryBadParameterTest() {
+        lib.queryBook("SELECT thetitle, author ORDER title");
+    }
+
+    @Test (expected = BadQueryException.class)
+    public void queryMissingParameterTest() {
+        lib.queryBook("SELECT title, author ORDER");
+    }
+
     @Test public void editBookTest() {
 
     }

@@ -340,7 +340,120 @@ This method allows the function to pass the test. The main concern with this fun
 that many different strings can be passed as the query. To enfore proper query strings, 
 we will make a series of exception tests to make sure the query string is proper:
 
+    @Test (expected = BadQueryException.class)
+    public void queryOutOfOrderTest() {
+        lib.queryBook("ORDER title SELECT title, author");
+    }
 
+    @Test (expected = BadQueryException.class)
+    public void queryBadSelectorTest() {
+        lib.queryBook("SELECTIFY title, author ORDER title");
+    }
+
+    @Test (expected = BadQueryException.class)
+    public void queryBadParameterTest() {
+        lib.queryBook("SELECT thetitle, author ORDER title");
+    }
+
+    @Test (expected = BadQueryException.class)
+    public void queryMissingParameterTest() {
+        lib.queryBook("SELECT title, author ORDER");
+    }
+
+These four tests check different possible errors in the query string. As usual, all of them fail.
+We will start by fixing the first exception test, queryOutOfOrderTest(), by adding this block of 
+code after breaking the query into an array:
+
+    ArrayList<ArrayList<String>> queryBook(String query) {
+        // break query into parts
+        List<String> parts = new ArrayList<>(Arrays.asList(query.split("\\s+")));
+        for(ListIterator<String> iter = parts.listIterator(); iter.hasNext(); ) {
+            String element = iter.next();
+            if(element.endsWith(",")) {
+                parts.set(parts.indexOf(element), element.substring(0, element.length() - 1));
+                // iter.add(",");
+            }
+        }
+
+>        // exception detection
+>        boolean foundSELECT = false;
+>        for(String el : parts) {
+>            if(el.equals("SELECT")) {
+>                foundSELECT = true;
+>            }
+>            if(el.equals("ORDER") && !foundSELECT) {
+>                throw new BadQueryException("ORDER before SELECT");
+>            }
+>        }
+        
+        ...
+
+    }
+
+Now that the first exception test is passing, we can move onto the second and third:
+
+        // exception detection
+        boolean foundSELECT = false;
+        for(String el : parts) {
+            if(el.equals("SELECT")) {
+                foundSELECT = true;
+            }
+            if(el.equals("ORDER") && !foundSELECT) {
+                throw new BadQueryException("ORDER before SELECT");
+            }
+>            if(!el.equals(",") && selects.get(el) == null && params.get(el) == null) {
+>                System.out.println(el);
+>                throw new BadQueryException("Bad selector/parameter");
+>            }
+        }
+
+These two tests are dependent on eachother which is why they were fixed with the same four lines of code.
+The Last exception test is queryMissingParameter():
+
+        // exception detection
+        boolean foundSELECT = false;
+>        String lastPart = "";
+        for(String el : parts) {
+            if(el.equals("SELECT")) {
+                foundSELECT = true;
+            }
+            if(el.equals("ORDER") && !foundSELECT) {
+                throw new BadQueryException("ORDER before SELECT");
+            }
+            if(!el.equals(",") && selects.get(el) == null && params.get(el) == null) {
+                throw new BadQueryException("Bad selector/parameter");
+            }
+>            if(selects.get(lastPart) != null && selects.get(el) != null) {
+>                throw new BadQueryException("Missing parameter");
+>            }
+>            lastPart = el;
+        }
+
+Adding the last if statement checks to make sure that all selectors are followed by at least one parameter.
+Due to the simplicity of these methods, no refactoring is necesary except for some commenting. The finished
+version looks like this:
+
+        // exception detection
+        boolean foundSELECT = false;
+        String lastPart = "";
+        for(String el : parts) {
+            // out of order selectors
+            if(el.equals("SELECT")) {
+                foundSELECT = true;
+            }
+            if(el.equals("ORDER") && !foundSELECT) {
+                throw new BadQueryException("ORDER before SELECT");
+            }
+            // bad selectors/parameters
+            if(!el.equals(",") && selects.get(el) == null && params.get(el) == null) {
+                throw new BadQueryException("Bad selector/parameter");
+            }
+            // missing parameters
+            if(selects.get(lastPart) != null && selects.get(el) != null) {
+                throw new BadQueryException("Missing parameter");
+            }
+            lastPart = el;
+        }
 
 
 ========================
