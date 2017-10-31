@@ -8,14 +8,47 @@ to create a database manager that can be used by librarians. The stories are as 
    checked in/out, and/or book ID.
 3. Librarian can edit a book's information.
 4. Librarian can remove a book from the database.
+5. Librarian can check books in and out.
 
 Step two is to create our first happy path test for the first user story. The test will 
-be addBookTest().
+initially be: 
 
+@Test public void addBookTest() {
+        String[] bookArr = {"Moby Dick", "That Man", "Adventure", "1969", "200"};
+        lib.addBook(bookArr[0], bookArr[1], bookArr[2], bookArr[3], bookArr[4]);
+        Assert.assertArrayEquals(bookArr, lib.books.get(0));
+    }
 
+Now we will implement our addBook() method:
 
+void addBook(String T, String A, String G, String Y, String P){
+    books.add(new String[A_NUM]);
+    String[] book = books.get(books.size() - 1);
 
+    book[0] = String.valueOf(books.size() - 1);
+    book[1] = "In";
+    book[2] = T;
+    book[3] = A;
+    book[4] = G;
+    book[5] = Y;
+    book[6] = P;
+}
 
+After we created our addBook() method, we noticed that there was an error in our code.
+We originally compared our bookArr array from the addBookTest() method to the array
+stored in our Library. This is not correct and our test revealed this error. Although
+the actual method was implemented correctly, it is good to ensure that your tests work
+properly as well.
+
+Our updated addBookTest() method is where we addded two new elements to our bookArr:
+
+@Test public void addBookTest() {
+    String[] bookArr = {"0", "In", "Moby Dick", "That Man", "Adventure", "1969", "200"};
+    lib.addBook(bookArr[2], bookArr[3], bookArr[4], bookArr[5], bookArr[6]);
+    Assert.assertArrayEquals(bookArr, lib.books.get(0));
+}
+
+Now our first happy path test is passing!
 
 
 
