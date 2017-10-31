@@ -1,0 +1,33 @@
+==Documentation==
+The first step in this TDD process was to generate user stories. For our project we decided 
+to create a database manager that can be used by librarians. The stories are as follows:
+
+-User Stories-
+1. Librarian can add a book to the database.
+2. Librarian can query database by title, author first/last, genre, publish year, page number, 
+   checked in/out, and/or book ID.
+3. Librarian can edit a book's information.
+4. Librarian can remove a book from the database.
+
+Step two is to create our first happy path test for the first user story. The test will 
+be addBookTest().
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. queryBookTest()
+3. editBookTest()
+4. removeBookTest()
+
+
