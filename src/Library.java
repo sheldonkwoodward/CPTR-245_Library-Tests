@@ -1,4 +1,11 @@
-import java.io.IOException;
+// Sheldon Woodward
+// Nick Perry
+// Homework 5
+// CPTR 245
+// 10/31/17
+
+import jdk.nashorn.internal.ir.annotations.Ignore;
+
 import java.util.*;
 
 public class Library {
@@ -11,13 +18,13 @@ public class Library {
         books = new ArrayList<>();
 
         // build selects
-        selects = new HashMap<String, Integer>();
+        selects = new HashMap<>();
         selects.put("SELECT", 0);
         selects.put("ORDER", 1);
         selects.put("END", 2);
 
         // build parameters
-        params = new HashMap<String, Integer>();
+        params = new HashMap<>();
         params.put("ID", 0);
         params.put("checked", 1);
         params.put("title", 2);
@@ -54,14 +61,13 @@ public class Library {
     ArrayList<ArrayList<String>> queryBook(String query) {
         // break query into parts
         List<String> parts = new ArrayList<>(Arrays.asList(query.split("\\s+")));
-        for(ListIterator<String> iter = parts.listIterator(); iter.hasNext(); ) {
-            String element = iter.next();
-            if(element.endsWith(",")) {
-                parts.set(parts.indexOf(element), element.substring(0, element.length() - 1));
+        for(String part : parts) {
+            if(part.endsWith(",")) {
+                parts.set(parts.indexOf(part), part.substring(0, part.length() - 1));
 
             }
         }
-        if(parts.get(parts.size() - 1) != "END") {
+        if(!parts.get(parts.size() - 1).equals("END")) {
             parts.add("END"); // add end to parts parse
         }
 
@@ -94,10 +100,7 @@ public class Library {
         String state = "";
 
         // main parse loop
-        for(ListIterator<String> iter = parts.listIterator(); iter.hasNext(); ) {
-            // current element from query string
-            String el = iter.next();
-
+        for(String el : parts) {
             // selectors
             if(el.equals("SELECT")) {
                 state = "SELECT";
@@ -141,8 +144,8 @@ public class Library {
                 });
 
                 // remove sorting info added SELECT
-                for(int i = 0; i < output.size(); i++) {
-                    output.get(i).remove(output.get(i).size() - 1);
+                for(ArrayList<String> book : output) {
+                    book.remove(book.size() - 1);
                 }
             }
             if(state.contains("ASC")) {

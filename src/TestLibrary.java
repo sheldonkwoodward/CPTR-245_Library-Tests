@@ -3,7 +3,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class TestLibrary {
@@ -63,14 +62,12 @@ public class TestLibrary {
         ArrayList<String> queryBook0 = new ArrayList<>();
         ArrayList<String> queryBook1 = new ArrayList<>();
         ArrayList<String> queryBook2 = new ArrayList<>();
-
         queryBook0.add(bookArr2[2]);
         queryBook0.add(bookArr2[3]);
         queryBook1.add(bookArr1[2]);
         queryBook1.add(bookArr1[3]);
         queryBook2.add(bookArr0[2]);
         queryBook2.add(bookArr0[3]);
-
         expected.add(queryBook0);
         expected.add(queryBook1);
         expected.add(queryBook2);
@@ -100,10 +97,6 @@ public class TestLibrary {
     @Test (expected = BadQueryException.class)
     public void queryMissingParameterTest() {
         lib.queryBook("SELECT title, author ORDER");
-    }
-
-    @Test public void editBookTest() {
-
     }
 
     @Test public void removeBookTest() {
