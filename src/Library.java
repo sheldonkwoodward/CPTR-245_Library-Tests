@@ -119,4 +119,20 @@ public class Library {
         }
         return output;
     }
+
+    void removeBook(String book_Id){
+        for (String[] book : books){
+            if (book[0].equals(book_Id)){
+                books.remove(book);
+                break;
+            }
+        }
+        for (String[] book : books){
+            if (Integer.parseInt(book[0]) > Integer.parseInt(book_Id)){
+                int newID = Integer.parseInt(book[0])-1;
+                book[0] = String.valueOf(newID);
+            }
+            System.out.println(book[0]);
+        }
+    }
 }

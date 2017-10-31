@@ -88,5 +88,28 @@ public class TestLibrary {
 
     @Test public void removeBookTest() {
 
+        String[] bookArr0 = {"0", "In", "Moby-Dick", "Herman Melville", "Adventure", "1851", "1200"};
+        String[] bookArr1 = {"1", "In", "If You Give a Mouse a Cookie", "Laura Numeroff", "Children", "1985", "20"};
+
+        // adding books in order to test removeBook() method
+        lib.addBook(bookArr0[2], bookArr0[3], bookArr0[4], bookArr0[5], bookArr0[6]);
+        lib.addBook(bookArr1[2], bookArr1[3], bookArr1[4], bookArr1[5], bookArr1[6]);
+
+        lib.removeBook(bookArr0[0]);
+        assert(lib.books.size() == 1);
+    }
+
+    @Test public void IdAssignmentAfterRemoveTest() {
+        String[] bookArr0 = {"0", "In", "Moby-Dick", "Herman Melville", "Adventure", "1851", "1200"};
+        String[] bookArr1 = {"1", "In", "If You Give a Mouse a Cookie", "Laura Numeroff", "Children", "1985", "20"};
+
+        // adding books in order to test removeBook() method
+        lib.addBook(bookArr0[2], bookArr0[3], bookArr0[4], bookArr0[5], bookArr0[6]);
+        lib.addBook(bookArr1[2], bookArr1[3], bookArr1[4], bookArr1[5], bookArr1[6]);
+
+        bookArr1[0] = "0";
+        lib.removeBook(bookArr0[0]);
+
+        assert(lib.books.get(0)[0].equals("0"));
     }
 }
