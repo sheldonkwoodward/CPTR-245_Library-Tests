@@ -124,6 +124,224 @@ set of tests.
 == 2. Query Book Tests ==
 =========================
 
+The query book feature in this project is a simple SQL like query system. This will allow for
+good control over the book data and its presentation. The query itself will be passed in 
+as a string and broken down within the queryBook() method. the return type will by an
+ArrayList containing String[] to represent each book.
+
+The statements available to the query are:
+1. SELECT <param> [, <param>]*
+2. ORDER [ASC] <param>
+
+<param> can be:
+1. id
+2. checked
+3. title
+4. author
+5. genre
+6. year
+7. page
+
+Our first happy path test will use the query "SELECT title, author ORDER DESC title". This query 
+should return the titles and authors of all the books in the database sorted in descending order
+by their title. Here is the initial queryBookTest() method:
+
+    @Test public void queryBookTest() {
+        // books to add to database
+        String[] bookArr0 = {"0", "In", "Moby-Dick", "Melville, Herman", "Adventure", "1851", "1200"};
+        String[] bookArr1 = {"1", "In", "If You Give a Mouse a Cookie", "Numeroff, Laura", "Children", "1985", "20"};
+        String[] bookArr2 = {"2", "In", "Harry Potter and the Chamber of Secrets", "Rowling, J. K.", "Fantasy", "1998", "800"};
+
+        // adding books
+        lib.addBook(bookArr0[2], bookArr0[3], bookArr0[4], bookArr0[5], bookArr0[6]);
+        lib.addBook(bookArr1[2], bookArr1[3], bookArr1[4], bookArr1[5], bookArr1[6]);
+        lib.addBook(bookArr2[2], bookArr2[3], bookArr2[4], bookArr2[5], bookArr2[6]);
+
+        // build expected query results
+        ArrayList<String[]> expected = new ArrayList<>();
+        String[] queryArr0 = {bookArr2[2], bookArr2[3]};
+        String[] queryArr1 = {bookArr1[2], bookArr1[3]};
+        String[] queryArr2 = {bookArr0[2], bookArr0[3]};
+        expected.add(queryArr0);
+        expected.add(queryArr1);
+        expected.add(queryArr2);
+
+        // query
+        ArrayList<String[]> actual = lib.queryBook("SELECT title, author ORDER DESC title");
+
+        // assert equals
+        Assert.assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+Obviously the test fails at this point since no code has been implemented yet. Now we can get 
+started on that part and write some code:
+
+    ArrayList<ArrayList<String>> queryBook(String query) {
+        // break query into parts
+        List<String> parts = new ArrayList<>(Arrays.asList(query.split("\\s+")));
+        for(ListIterator<String> iter = parts.listIterator(); iter.hasNext(); ) {
+            String element = iter.next();
+
+            // move comma
+            if(element.endsWith(",")) {
+                parts.set(parts.indexOf(element), element.substring(0, element.length() - 1));
+                // iter.add(",");
+            }
+        }
+        // add END statement
+        if(!parts.get(parts.size() - 1).equals("END")) {
+            parts.add("END");
+        }
+
+        // declare output of parse
+        ArrayList<ArrayList<String>> output = new ArrayList<>();
+
+        // parse parts
+        String previous = "";
+        for(ListIterator<String> iter = parts.listIterator(); iter.hasNext(); ) {
+            String element = iter.next();
+
+            // selectors
+            if(element.equals("SELECT")) {
+                previous = "SELECT";
+
+                // add blank books
+                for(int i = 0; i < books.size(); i ++) {
+                    output.add(new ArrayList<>());
+                }
+                continue;
+            }
+            else if(element.equals("CONTAINS")) {
+                previous = "CONTAINS";
+                continue;
+            }
+            else if(element.equals("ORDER")) {
+                previous = "ORDER";
+                continue;
+            }
+            else if(element.equals("ASC")) {
+                previous += " ASC";
+                continue;
+            }
+            else if(element.equals("END")) {
+                previous = "END";
+                continue;
+            }
+
+            // params based on selectors
+            if(previous.contains("SELECT")) {
+                for(int i = 0; i < output.size(); i++) {
+                    output.get(i).add(books.get(i)[params.get(element)]);
+                }
+            }
+            if(previous.contains("ORDER")) {
+                for(int i = 0; i < output.size(); i++) {
+                    output.get(i).add(books.get(i)[params.get(element)]);
+                }
+
+                Collections.sort(output, new Comparator<ArrayList<String>>() {
+                    @Override
+                    public int compare(ArrayList<String> one, ArrayList<String> two) {
+                        return one.get(one.size() - 1).compareTo(two.get(two.size() - 1));
+                    }
+                });
+
+                for(int i = 0; i < output.size(); i++) {
+                    output.get(i).remove(output.get(i).size() - 1);
+                }
+            }
+            if(previous.contains("ASC")) {
+                Collections.reverse(output);
+            }
+        }
+
+        return output;
+    }
+
+After refactoring:
+
+    ArrayList<ArrayList<String>> queryBook(String query) {
+        // break query into parts
+        List<String> parts = new ArrayList<>(Arrays.asList(query.split("\\s+")));
+        for(ListIterator<String> iter = parts.listIterator(); iter.hasNext(); ) {
+            String element = iter.next();
+            if(element.endsWith(",")) {
+                parts.set(parts.indexOf(element), element.substring(0, element.length() - 1));
+                // iter.add(",");
+            }
+        }
+
+        // output of parse
+        ArrayList<ArrayList<String>> output = new ArrayList<>();
+
+        // current operation state
+        String state = "";
+
+        // main parse loop
+        for(ListIterator<String> iter = parts.listIterator(); iter.hasNext(); ) {
+            // current element from query string
+            String el = iter.next();
+
+            // selectors
+            if(el.equals("SELECT")) {
+                state = "SELECT";
+
+                // add blank books
+                for(int i = 0; i < books.size(); i ++) {
+                    output.add(new ArrayList<>());
+                }
+                continue;
+            }
+            if(el.equals("CONTAINS")) {
+                state = "CONTAINS";
+                continue;
+            }
+            if(el.equals("ORDER")) {
+                state = "ORDER";
+                continue;
+            }
+            if(el.equals("ASC")) {
+                state += " ASC";
+                continue;
+            }
+            if(el.equals("END")) {
+                state = "END";
+                continue;
+            }
+
+            // params based on selectors
+            if(state.equals("SELECT") || state.equals("ORDER")) {
+                for(int i = 0; i < output.size(); i++) {
+                    output.get(i).add(books.get(i)[params.get(el)]);
+                }
+            }
+            if(state.equals("ORDER")) {
+                // sort based on sorting info
+                Collections.sort(output, new Comparator<ArrayList<String>>() {
+                    @Override
+                    public int compare(ArrayList<String> one, ArrayList<String> two) {
+                        return one.get(one.size() - 1).compareTo(two.get(two.size() - 1));
+                    }
+                });
+
+                // remove sorting info added SELECT
+                for(int i = 0; i < output.size(); i++) {
+                    output.get(i).remove(output.get(i).size() - 1);
+                }
+            }
+            if(state.contains("ASC")) {
+                Collections.reverse(output);
+            }
+        }
+        return output;
+    }
+
+This method allows the function to pass the test. The main concern with this function is
+that many different strings can be passed as the query. To enfore proper query strings, 
+we will make a series of exception tests to make sure the query string is proper:
+
+
+
 
 ========================
 == 3. Edit Book Tests ==
@@ -133,4 +351,5 @@ set of tests.
 ==========================
 == 4. Remove Book Tests ==
 ==========================
+
 

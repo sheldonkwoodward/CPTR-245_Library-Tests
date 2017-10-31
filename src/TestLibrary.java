@@ -2,6 +2,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 
 public class TestLibrary {
     private Library lib;
@@ -45,7 +48,38 @@ public class TestLibrary {
     }
 
     @Test public void queryBookTest() {
+        // books to add to database
+        String[] bookArr0 = {"0", "In", "Moby-Dick", "Melville, Herman", "Adventure", "1851", "1200"};
+        String[] bookArr1 = {"1", "In", "If You Give a Mouse a Cookie", "Numeroff, Laura", "Children", "1985", "20"};
+        String[] bookArr2 = {"2", "In", "Harry Potter and the Chamber of Secrets", "ARowling, J. K.", "Fantasy", "1998", "800"};
 
+        // adding books
+        lib.addBook(bookArr0[2], bookArr0[3], bookArr0[4], bookArr0[5], bookArr0[6]);
+        lib.addBook(bookArr1[2], bookArr1[3], bookArr1[4], bookArr1[5], bookArr1[6]);
+        lib.addBook(bookArr2[2], bookArr2[3], bookArr2[4], bookArr2[5], bookArr2[6]);
+
+        // build expected query results
+        ArrayList<ArrayList<String>> expected = new ArrayList<>();
+        ArrayList<String> queryBook0 = new ArrayList<>();
+        ArrayList<String> queryBook1 = new ArrayList<>();
+        ArrayList<String> queryBook2 = new ArrayList<>();
+
+        queryBook0.add(bookArr2[2]);
+        queryBook0.add(bookArr2[3]);
+        queryBook1.add(bookArr1[2]);
+        queryBook1.add(bookArr1[3]);
+        queryBook2.add(bookArr0[2]);
+        queryBook2.add(bookArr0[3]);
+
+        expected.add(queryBook0);
+        expected.add(queryBook1);
+        expected.add(queryBook2);
+
+        // query
+        ArrayList<ArrayList<String>> actual = lib.queryBook("SELECT title, author ORDER title");
+
+        // assert equals
+        Assert.assertArrayEquals(expected.toArray(), actual.toArray());
     }
 
     @Test public void editBookTest() {

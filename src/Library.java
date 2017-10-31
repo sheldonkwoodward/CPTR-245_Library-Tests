@@ -1,11 +1,23 @@
-import java.util.ArrayList;
+import java.io.IOException;
+import java.util.*;
 
 public class Library {
     private final int A_NUM = 7; // number of attributes for each books
+    private Map<String, Integer> params;
     ArrayList<String[]> books; // books list
 
     Library() {
         books = new ArrayList<>();
+
+        // build parameters
+        params = new HashMap<String, Integer>();
+        params.put("ID", 0);
+        params.put("checked", 1);
+        params.put("title", 2);
+        params.put("author", 3);
+        params.put("genre", 4);
+        params.put("year", 5);
+        params.put("page", 6);
     }
 
     void addBook(String title, String author, String genre, String year, String pageNum) {
@@ -30,5 +42,81 @@ public class Library {
         book[4] = genre;
         book[5] = year;
         book[6] = pageNum;
+    }
+
+    ArrayList<ArrayList<String>> queryBook(String query) {
+        // break query into parts
+        List<String> parts = new ArrayList<>(Arrays.asList(query.split("\\s+")));
+        for(ListIterator<String> iter = parts.listIterator(); iter.hasNext(); ) {
+            String element = iter.next();
+            if(element.endsWith(",")) {
+                parts.set(parts.indexOf(element), element.substring(0, element.length() - 1));
+                // iter.add(",");
+            }
+        }
+
+        // output of parse
+        ArrayList<ArrayList<String>> output = new ArrayList<>();
+
+        // current operation state
+        String state = "";
+
+        // main parse loop
+        for(ListIterator<String> iter = parts.listIterator(); iter.hasNext(); ) {
+            // current element from query string
+            String el = iter.next();
+
+            // selectors
+            if(el.equals("SELECT")) {
+                state = "SELECT";
+
+                // add blank books
+                for(int i = 0; i < books.size(); i ++) {
+                    output.add(new ArrayList<>());
+                }
+                continue;
+            }
+            if(el.equals("CONTAINS")) {
+                state = "CONTAINS";
+                continue;
+            }
+            if(el.equals("ORDER")) {
+                state = "ORDER";
+                continue;
+            }
+            if(el.equals("ASC")) {
+                state += " ASC";
+                continue;
+            }
+            if(el.equals("END")) {
+                state = "END";
+                continue;
+            }
+
+            // params based on selectors
+            if(state.equals("SELECT") || state.equals("ORDER")) {
+                for(int i = 0; i < output.size(); i++) {
+                    output.get(i).add(books.get(i)[params.get(el)]);
+                }
+            }
+            if(state.equals("ORDER")) {
+                // sort based on sorting info
+                Collections.sort(output, new Comparator<ArrayList<String>>() {
+                    @Override
+                    public int compare(ArrayList<String> one, ArrayList<String> two) {
+                        return one.get(one.size() - 1).compareTo(two.get(two.size() - 1));
+                    }
+                });
+
+                // remove sorting info added SELECT
+                for(int i = 0; i < output.size(); i++) {
+                    output.get(i).remove(output.get(i).size() - 1);
+                }
+            }
+            if(state.contains("ASC")) {
+                Collections.reverse(output);
+            }
+        }
+        return output;
     }
 }
